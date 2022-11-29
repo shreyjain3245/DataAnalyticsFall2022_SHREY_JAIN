@@ -1,19 +1,19 @@
-#load the expss library that will be used for variable labeling
+# load the expss library that will be used for variable labeling
 library(expss)
 
-#find your working directory for R
+# find your working directory for R
 getwd()
 
-#change your working directory to the location where your files are
-#  (make sure you put the folder path for your new directory between the 
+# change your working directory to the location where your files are
+#  (make sure you put the folder path for your new directory between the
 #   quotation marks)
 setwd("C:/Users/Shrey Jain/Documents/Study/Data Analytics/DataAnalyticsFall2022_SHREY_JAIN/Lab/DataAnalytics_A5_SHREY_JAIN/EMS Data")
 
-#load data
-a<-readRDS("training_final.RDS")
+# load data
+a <- readRDS("training_final.RDS")
 
-#label initial_call_type
-val_lab(a$initial_call_type)=num_lab("
+# label initial_call_type
+val_lab(a$initial_call_type) <- num_lab("
 1 Abdominal Pain-Fever & Cough
 2 Abdominal Pain-Fever & Cough
 3 Abdominal Pain Fever-Travel
@@ -62,7 +62,7 @@ val_lab(a$initial_call_type)=num_lab("
 46 EDPC
 47 EDPW
 48 Electrocution
-49 Evac 
+49 Evac
 50 Fire75 Working Fire
 51 Fire76 High Rise Commercial
 52 Fire77 High Rise Residential
@@ -184,11 +184,11 @@ val_lab(a$initial_call_type)=num_lab("
 168 Venom (Snake Bites)
 ")
 
-#check that initial call type labels loaded correctly
+# check that initial call type labels loaded correctly
 data.frame(table(a$initial_call_type))
 
-#label final_call_type
-val_lab(a$final_call_type)=num_lab("
+# label final_call_type
+val_lab(a$final_call_type) <- num_lab("
 1 Abdominal Pain-Fever & Cough
 2 Abdominal Pain-Fever & Cough
 3 Abdominal Pain Fever-Travel
@@ -233,7 +233,7 @@ val_lab(a$final_call_type)=num_lab("
 42 EDPC
 43 EDPW
 44 Electrocution
-45 Evac 
+45 Evac
 46 Fire75 Working Fire
 47 Fire77 High Rise Residential
 48 Gyn Bleeding-Pt Not Pregnant
@@ -362,17 +362,17 @@ val_lab(a$final_call_type)=num_lab("
 171 Venom (Snake Bites)
 ")
 
-#check that final call type labels loaded correctly
+# check that final call type labels loaded correctly
 data.frame(table(a$final_call_type))
 
-#create month variable
+# create month variable
 a$month <- format(as.Date(a$incident_dt), "%m")
 
-#create day of week variable
+# create day of week variable
 a$dow <- weekdays(as.Date(a$incident_dt))
 
-#label incident disposition code
-val_lab(a$incident_disposition_code)=num_lab("
+# label incident disposition code
+val_lab(a$incident_disposition_code) <- num_lab("
 82	transporting patient
 83	patient pronounced dead
 87	cancelled
@@ -385,64 +385,71 @@ val_lab(a$incident_disposition_code)=num_lab("
 96	patient gone on arrival
 ")
 
-#check that final call type labels loaded correctly
+# check that final call type labels loaded correctly
 data.frame(table(a$incident_disposition_code))
 
-#run table of incident disposition code by year
+# run table of incident disposition code by year
 table(a$incident_disposition_code, a$incident_year)
 
-#bar chart of incidents by year
-counts_total <- table(a$incident_year) #creates a count of incidents by year and stores it in a new value frame
-  barplot(counts_total, xlab="Year", ylab="# of Incidents", col=c("red"), main = "EMS Incidents by Year")
+# bar chart of incidents by year
+counts_total <- table(a$incident_year) # creates a count of incidents by year and stores it in a new value frame
+barplot(counts_total, xlab = "Year", ylab = "# of Incidents", col = c("red"), main = "EMS Incidents by Year")
 
-  #line chart of incidents by year
-  plot(counts_total, type="o", xlab="Year", ylab="# of Incidents", col=c("red"), main = "EMS Incidents by Year")
-  
-#multiple line chart of incidents by month and year
-  counts_month <- as.data.frame.matrix(table(a$month,a$incident_year)) #creates a count of incidents by year and stores it in a new value frame
-  
-  library(data.table)
-  setDT(counts_month, keep.rownames = TRUE)[] #to create the first row as the row names, i.e years
-  colnames(counts_month)[1]<-"month" #rename the first column heading as Month
-  
-  library(ggplot2) #powerful graphics generator for R
-  library(reshape) #to transform a table of rows and columns into individual entries for each row-column combo - think 2008-March and 2009-Feb
-  Molten <- melt(counts_month, id.vars = "month")
-  colnames(Molten)[2]<-"year" #rename the second column heading as year
-  str(Molten) #checks to see whether we have a variable stored as a factor rather than numeric
-  Molten$year<-as.numeric(as.character(Molten$year)) #change year from factor to numeric
-  Molten$month<-as.numeric(as.character(Molten$month)) #change month from character to numeric
-  ggplot(Molten, aes(x = month, y=value, group=year)) + geom_line(aes(color=year)) + xlim(1,12) #generate multiple line plots by year
-  ggplot(Molten, aes(x = year, y=value)) + geom_line() + xlim(2008,2016)
-  
-#multiple charts with incidents by month for a single year
-countsmo<-ggplot(Molten, aes(year,value)) +       # we are creating a single year chart
-    geom_line() +
-    ggtitle("EMS Incident Calls by Month and Year") +
-    xlab("year") + ylab("# of Calls") +
-    xlim(2008,2016) +
-    theme(plot.title = element_text(lineheight=.8, face="bold",
-                                    size = 20)) +
-    theme(text = element_text(size=18))
-countsmo + facet_wrap(~ month, ncol=3) #the use of facet_wrap helps to repeat the single year chart across years
+# line chart of incidents by year
+plot(counts_total, type = "o", xlab = "Year", ylab = "# of Incidents", col = c("red"), main = "EMS Incidents by Year")
 
-#stacked bar chart  of incident dispositions by year
-  counts <- table(a$incident_disposition_code, a$incident_year) #creates a count of incidents by year and stores it in a new value frame
-  #plot one - the bar chart with no legend
-  opar = par(oma = c(0,0,0,14)) # creates large right margin for plot
-  barplot(counts, xlab="Year", col=rainbow(10))
-  par(opar) # Reset par
-  #plot two - the legend on top of the bar chart
-  opar = par(oma = c(0,0,0,0), mar = c(0,0,0,0), new = TRUE) #creates a new margin set up for the legend
-  legend(x = "right", legend = rownames(counts), fill = rainbow(10), bty = "n", y.intersp = 2) #creates a legend
-  par(opar) # Reset par
-  
+# multiple line chart of incidents by month and year
+counts_month <- as.data.frame.matrix(table(a$month, a$incident_year)) # creates a count of incidents by year and stores it in a new value frame
+
+library(data.table)
+setDT(counts_month, keep.rownames = TRUE)[] # to create the first row as the row names, i.e years
+colnames(counts_month)[1] <- "month" # rename the first column heading as Month
+
+library(ggplot2) # powerful graphics generator for R
+library(reshape) # to transform a table of rows and columns into individual entries for each row-column combo - think 2008-March and 2009-Feb
+Molten <- melt(counts_month, id.vars = "month")
+colnames(Molten)[2] <- "year" # rename the second column heading as year
+str(Molten) # checks to see whether we have a variable stored as a factor rather than numeric
+Molten$year <- as.numeric(as.character(Molten$year)) # change year from factor to numeric
+Molten$month <- as.numeric(as.character(Molten$month)) # change month from character to numeric
+ggplot(Molten, aes(x = month, y = value, group = year)) +
+  geom_line(aes(color = year)) +
+  xlim(1, 12) # generate multiple line plots by year
+ggplot(Molten, aes(x = year, y = value)) +
+  geom_line() +
+  xlim(2008, 2016)
+
+# multiple charts with incidents by month for a single year
+countsmo <- ggplot(Molten, aes(year, value)) + # we are creating a single year chart
+  geom_line() +
+  ggtitle("EMS Incident Calls by Month and Year") +
+  xlab("year") +
+  ylab("# of Calls") +
+  xlim(2008, 2016) +
+  theme(plot.title = element_text(
+    lineheight = .8, face = "bold",
+    size = 20
+  )) +
+  theme(text = element_text(size = 18))
+countsmo + facet_wrap(~month, ncol = 3) # the use of facet_wrap helps to repeat the single year chart across years
+
+# stacked bar chart  of incident dispositions by year
+counts <- table(a$incident_disposition_code, a$incident_year) # creates a count of incidents by year and stores it in a new value frame
+# plot one - the bar chart with no legend
+opar <- par(oma = c(0, 0, 0, 14)) # creates large right margin for plot
+barplot(counts, xlab = "Year", col = rainbow(10))
+par(opar) # Reset par
+# plot two - the legend on top of the bar chart
+opar <- par(oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE) # creates a new margin set up for the legend
+legend(x = "right", legend = rownames(counts), fill = rainbow(10), bty = "n", y.intersp = 2) # creates a legend
+par(opar) # Reset par
+
 dim(a)
 str(a)
 View(a)
 
 
-model_linear <- lm(incident_response_seconds_qy~., data=a)
+model_linear <- lm(incident_response_seconds_qy ~ ., data = a)
 summary(model5_linear)
-plot(SALE.PRICE~GROSS.SQUARE.FEET+LAND.SQUARE.FEET, data=sales)
-abline(model5_linear, col="green")
+plot(SALE.PRICE ~ GROSS.SQUARE.FEET + LAND.SQUARE.FEET, data = sales)
+abline(model5_linear, col = "green")
