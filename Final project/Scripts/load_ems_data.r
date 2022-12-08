@@ -396,7 +396,7 @@ counts_total <- table(a$incident_year) # creates a count of incidents by year an
 barplot(counts_total, xlab = "Year", ylab = "# of Incidents", col = c("red"), main = "EMS Incidents by Year")
 
 # line chart of incidents by year
-plot(counts_total, type = "o", xlab = "Year", ylab = "# of Incidents", col = c("red"), main = "EMS Incidents by Year")
+plot(counts_total, type = "o", xlab = "Year", ylab = "Number of Incidents", col = c("red"), main = "EMS Incidents by Year")
 
 # multiple line chart of incidents by month and year
 counts_month <- as.data.frame.matrix(table(a$month, a$incident_year)) # creates a count of incidents by year and stores it in a new value frame
@@ -437,7 +437,7 @@ countsmo + facet_wrap(~month, ncol = 3) # the use of facet_wrap helps to repeat 
 counts <- table(a$incident_disposition_code, a$incident_year) # creates a count of incidents by year and stores it in a new value frame
 # plot one - the bar chart with no legend
 opar <- par(oma = c(0, 0, 0, 14)) # creates large right margin for plot
-barplot(counts, xlab = "Year", col = rainbow(10))
+barplot(counts, xlab = "Year", ylab = "Response time", col = rainbow(10))
 par(opar) # Reset par
 # plot two - the legend on top of the bar chart
 opar <- par(oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE) # creates a new margin set up for the legend
