@@ -443,14 +443,3 @@ par(opar) # Reset par
 opar <- par(oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE) # creates a new margin set up for the legend
 legend(x = "right", legend = rownames(counts), fill = rainbow(10), bty = "n", y.intersp = 2) # creates a legend
 par(opar) # Reset par
-
-dim(a)
-str(a)
-View(a)
-
-sapply(lapply(a, unique), length)
-
-model_linear <- lm(incident_response_seconds_qy~., data = a)
-summary(model5_linear)
-plot(SALE.PRICE ~ GROSS.SQUARE.FEET + LAND.SQUARE.FEET, data = sales)
-abline(model5_linear, col = "green")

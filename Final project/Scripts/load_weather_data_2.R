@@ -2,16 +2,8 @@ library(labelled)
 library(dplyr)
 library(lubridate)
 #find your working directory for R
-getwd()
-
-#change your working directory to the location where your files are
-#  (make sure you put the folder path for your new directory between the 
-#   quotation marks)
-setwd("C:/Users/Shrey Jain/Documents/Study/Data Analytics/DataAnalyticsFall2022_SHREY_JAIN/Final project/Data/Weather")
-
-#loading weather data in CSV format
-b<-read.csv("GHCND_NY_Central_Park_20080101_20161231.csv",header=TRUE)
-
+b<-read.csv(file.choose(),header=TRUE)
+head(b)
 #labelling different variables
 var_label(b$AWND) <- "Average Daily Wind Speed (mi/h)"
 var_label(b$FMTM) <- "Time of Fastest 1-minute wind (HHMM)"
@@ -68,12 +60,10 @@ ggplot(g, aes(month, precip_total)) +
 
 #merge data at the incident level
 merged_data <- left_join(a,b,by="date_m")
-
 merged_data
-dim(a)
 # remove na in r - remove rows - na.omit function / option
 a<-na.omit(a)
-dim(a)
+
 #Filtered the merged_data according to borough
 merged_data_manhattan <- merged_data[merged_data$borough=="MANHATTAN", ] 
 View(merged_data_manhattan)
@@ -94,10 +84,9 @@ lowerInnerFence <- quantile(merged_data_manhattan$incident_response_seconds_qy, 
 lowerInnerFence
 upperInnerFence <- quantile(merged_data_manhattan$incident_response_seconds_qy, 0.75, na.rm=TRUE) + 1.5 * iqr
 upperInnerFence
-dim(merged_data_manhattan)
+
 merged_data_manhattanNoOutliers <- merged_data_manhattan[merged_data_manhattan$incident_response_seconds_qy <= upperInnerFence,]
 View(merged_data_manhattanNoOutliers)
-dim(merged_data_manhattanNoOutliers)
 
 #Plotting the data to check for outliers
 hist(merged_data_manhattanNoOutliers$incident_response_seconds_qy, prob=T, main='Incident Response Time')
@@ -137,22 +126,3 @@ merged_data_manhattanNoOutliers$transfer_indicator[merged_data_manhattanNoOutlie
 merged_data_manhattanNoOutliers$transfer_indicator[merged_data_manhattanNoOutliers$transfer_indicator == 'N'] <- 0
 
 sapply(merged_data_manhattanNoOutliers, class)
-dim(merged_data_manhattanNoOutliers)
-
-merged_data_manhattanNoOutliers <- na.omit(merged_data_manhattanNoOutliers)
-library(dplyr)
-
-merged_data_manhattanNoOutliers <- select(merged_data_manhattanNoOutliers, -WT03)
-merged_data_manhattanNoOutliers <- select(merged_data_manhattanNoOutliers, -WT04)
-merged_data_manhattanNoOutliers <- select(merged_data_manhattanNoOutliers, -valid_incident_rspns_time_indc)
-merged_data_manhattanNoOutliers <- select(merged_data_manhattanNoOutliers, -valid_dispatch_rspns_time_indc)
-merged_data_manhattanNoOutliers <- select(merged_data_manhattanNoOutliers, -WT14)
-
-sapply(lapply(merged_data_manhattanNoOutliers, unique), length)
-
-View(merged_data_manhattanNoOutliers)
-
-model_linear <- lm(incident_response_seconds_qy~., data = merged_data_manhattanNoOutliers)
-summary(model_linear)
-plot(incident_response_seconds_qy, data = merged_data_manhattanNoOutliers)
-abline(model5_linear, col = "green")
