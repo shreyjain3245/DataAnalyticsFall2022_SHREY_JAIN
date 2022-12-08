@@ -437,7 +437,7 @@ countsmo + facet_wrap(~month, ncol = 3) # the use of facet_wrap helps to repeat 
 counts <- table(a$incident_disposition_code, a$incident_year) # creates a count of incidents by year and stores it in a new value frame
 # plot one - the bar chart with no legend
 opar <- par(oma = c(0, 0, 0, 14)) # creates large right margin for plot
-barplot(counts, xlab = "Year", ylab = "Response time", col = rainbow(10))
+barplot(counts, xlab = "Year", col = rainbow(10))
 par(opar) # Reset par
 # plot two - the legend on top of the bar chart
 opar <- par(oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE) # creates a new margin set up for the legend
