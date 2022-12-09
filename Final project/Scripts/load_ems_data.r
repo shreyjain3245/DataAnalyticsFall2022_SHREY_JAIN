@@ -393,8 +393,10 @@ table(a$incident_disposition_code, a$incident_year)
 
 # bar chart of incidents by year
 counts_total <- table(a$incident_year) # creates a count of incidents by year and stores it in a new value frame
-barplot(counts_total, xlab = "Year", ylab = "# of Incidents", col = c("red"), main = "EMS Incidents by Year")
+barplot(counts_total, xlab = "Year", ylab = "Number of Incidents", col = c("red"), main = "EMS Incidents by Year")
 
+summary(a$incident_response_seconds_qy)
+help("summary")
 # line chart of incidents by year
 plot(counts_total, type = "o", xlab = "Year", ylab = "Number of Incidents", col = c("red"), main = "EMS Incidents by Year")
 
