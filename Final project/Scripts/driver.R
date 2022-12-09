@@ -1,37 +1,30 @@
-merged_data
+ems <- a
+weather <- b
+final <- merged_data
 
-setwd("C:/Users/Shrey Jain/Documents/Study/Data Analytics/DataAnalyticsFall2022_SHREY_JAIN/Final project/Data/EMS")
-ems_data <- readRDS("training_final.RDS")
-dim(ems_data)
-ems_data_without_na <- na.omit(ems_data)
-dim(ems_data_without_na)
-# remove na in r - remove rows - na.omit function / option
-a<-na.omit(a)
-dim(a)
-#Filtered the merged_data according to borough
-merged_data_manhattan <- merged_data[merged_data$borough=="MANHATTAN", ] 
-View(merged_data_manhattan)
+#NA Removal
+dim(ems)
+ems_no_na <- na.omit(ems)
+dim(ems_no_na)
+#Data Filtering as we only have Manhattan NYC weather data
+final_filtered <- final[final$borough=="MANHATTAN", ] 
+#Removing two columns that have the most NA values
+final_filtered <- subset(final_filtered, select= -c(TSUN, TAVG))
 
-#Removing columns with most NA values
-merged_data_manhattan <- subset(merged_data_manhattan, select= -c(TAVG, TSUN))
-View(merged_data_manhattan)
+#Outlier Removal - IQR
+IQR(final_filtered$incident_response_seconds_qy, na.rm=TRUE)
+Tmin = fivenum(final_filtered$incident_response_seconds_qy)[2] - (1.5*IQR(final_filtered$incident_response_seconds_qy, na.rm = TRUE))
+Tmin
+Tmax = fivenum(final_filtered$incident_response_seconds_qy)[4] + (1.5*IQR(final_filtered$incident_response_seconds_qy, na.rm = TRUE))
+Tmax
+# Find outlier count
+length(final_filtered$incident_response_seconds_qy[which(final_filtered$incident_response_seconds_qy < Tmin | final_filtered$incident_response_seconds_qy > Tmax)])
+# Remove outlier
+final_filtered[final_filtered$incident_response_seconds_qy > Tmin & final_filtered$incident_response_seconds_qy < Tmax,]
+dim(final_filtered)
 
-
-hist(merged_data_manhattan$incident_response_seconds_qy,seq(0, 40000, 1000.0), main='Incident Response Time', col = "blue", xlab = "Response time (in seconds)", ylab = "Frequency")
-boxplot(merged_data_manhattan$incident_response_seconds_qy, main='Incident Response Time', col = "blue")
-
-#Removing Outliers
-# Finding outliers with interquartile range
-iqr <- IQR(merged_data_manhattan$incident_response_seconds_qy, na.rm=TRUE)
-iqr
-lowerInnerFence <- quantile(merged_data_manhattan$incident_response_seconds_qy, 0.25,na.rm=TRUE) - 1.5 * iqr
-lowerInnerFence
-upperInnerFence <- quantile(merged_data_manhattan$incident_response_seconds_qy, 0.75, na.rm=TRUE) + 1.5 * iqr
-upperInnerFence
-dim(merged_data_manhattan)
-final_dataset_without_outliers <- merged_data_manhattan[merged_data_manhattan$incident_response_seconds_qy <= upperInnerFence,]
-View(final_dataset_without_outliers)
-dim(final_dataset_without_outliers)
+final_no_outlier <- final_filtered[final_filtered$incident_response_seconds_qy <= Tmax,]
+dim(final_no_outlier)
 
 #Plotting the data to check for outliers
 hist(final_dataset_without_outliers$incident_response_seconds_qy, prob=T, main='Incident Response Time', col = "green", xlab = "Response time (in seconds)", ylab = "Frequency")
@@ -85,8 +78,10 @@ sapply(lapply(final_dataset_without_outliers, unique), length)
 
 View(final_dataset_without_outliers)
 
+#Linear Regression
 model_linear <- lm(incident_response_seconds_qy~., data = final_dataset_without_outliers)
 summary(model_linear)
+sqrt(mean(model_linear$residuals^2))
 
 #Install Package
 install.packages("e1071")
@@ -94,8 +89,9 @@ install.packages("e1071")
 #Load Library
 library(e1071)
 
+final_dataset_without_outliers$PRCP
 #Regression with SVM
-modelsvm = svm(incident_response_seconds_qy~.,final_dataset_without_outliers)
+modelsvm = svm(incident_response_seconds_qy~SNOW+PRCP,final_dataset_without_outliers)
 
 #Predict using SVM regression
 predYsvm = predict(modelsvm, data)
