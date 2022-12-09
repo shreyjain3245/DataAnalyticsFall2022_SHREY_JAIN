@@ -1,3 +1,11 @@
+library(dplyr)
+#Install Package
+install.packages("e1071")
+install.packages("Metrics")
+#Load Library
+library(e1071)
+
+
 ems <- a
 weather <- b
 final <- merged_data
@@ -27,74 +35,83 @@ final_no_outlier <- final_filtered[final_filtered$incident_response_seconds_qy <
 dim(final_no_outlier)
 
 #Plotting the data to check for outliers
-hist(final_dataset_without_outliers$incident_response_seconds_qy, prob=T, main='Incident Response Time', col = "green", xlab = "Response time (in seconds)", ylab = "Frequency")
-boxplot(final_dataset_without_outliers$incident_response_seconds_qy, main='Incident Response Time')
+hist(final_filtered$incident_response_seconds_qy, prob=T, main='Incident Response Time', col = "blue", xlab = "Response time (in seconds)", ylab = "Frequency")
+boxplot(final_filtered$incident_response_seconds_qy, main='Incident Response Time')
+
+hist(final_no_outlier$incident_response_seconds_qy, prob=T, main='Incident Response Time', col = "green", xlab = "Response time (in seconds)", ylab = "Frequency")
+boxplot(final_no_outlier$incident_response_seconds_qy, main='Incident Response Time')
 
 #Modelling
-final_dataset_without_outliers <- final_dataset_without_outliers[final_dataset_without_outliers$zipcode=="10019" | final_dataset_without_outliers$zipcode=="10023" | final_dataset_without_outliers$zipcode=="10024" | final_dataset_without_outliers$zipcode=="10025", ]
+final_no_outlier <- final_no_outlier[final_no_outlier$zipcode=="10019" | final_no_outlier$zipcode=="10023" | final_no_outlier$zipcode=="10024" | final_no_outlier$zipcode=="10025", ]
 #remove from EMS dataset
-final_dataset_without_outliers <- subset(final_dataset_without_outliers, select= -c(cad_incident_id,borough, incident_dispatch_area, incident_dt, first_assign_dt, first_act_dt, first_on_scene_dt, first_to_hosp_dt, first_hosp_arrival_dt, incident_close_dt, incident_year ))
+final_no_outlier <- subset(final_no_outlier, select= -c(cad_incident_id,borough, incident_dispatch_area, incident_dt, first_assign_dt, first_act_dt, first_on_scene_dt, first_to_hosp_dt, first_hosp_arrival_dt, incident_close_dt, incident_year ))
 #remove from weather dataset
-final_dataset_without_outliers <- subset(final_dataset_without_outliers, select= -c(dow, date_m, STATION, NAME, DATE))
-View(final_dataset_without_outliers)
+final_no_outlier <- subset(final_no_outlier, select= -c(dow, date_m, STATION, NAME, DATE))
+
+final_no_outlier$valid_incident_rspns_time_indc[final_no_outlier$valid_incident_rspns_time_indc == 'Y'] <- 1
+final_no_outlier$valid_incident_rspns_time_indc[final_no_outlier$valid_incident_rspns_time_indc == 'N'] <- 0
 
 
-final_dataset_without_outliers$valid_incident_rspns_time_indc[final_dataset_without_outliers$valid_incident_rspns_time_indc == 'Y'] <- 1
-final_dataset_without_outliers$valid_incident_rspns_time_indc[final_dataset_without_outliers$valid_incident_rspns_time_indc == 'N'] <- 0
+final_no_outlier$valid_dispatch_rspns_time_indc[final_no_outlier$valid_dispatch_rspns_time_indc == 'Y'] <- 1
+final_no_outlier$valid_dispatch_rspns_time_indc[final_no_outlier$valid_dispatch_rspns_time_indc == 'N'] <- 0
 
 
-final_dataset_without_outliers$valid_dispatch_rspns_time_indc[final_dataset_without_outliers$valid_dispatch_rspns_time_indc == 'Y'] <- 1
-final_dataset_without_outliers$valid_dispatch_rspns_time_indc[final_dataset_without_outliers$valid_dispatch_rspns_time_indc == 'N'] <- 0
+final_no_outlier$held_indicator[final_no_outlier$held_indicator == 'Y'] <- 1
+final_no_outlier$held_indicator[final_no_outlier$held_indicator == 'N'] <- 0
+
+final_no_outlier$reopen_indicator[final_no_outlier$reopen_indicator == 'Y'] <- 1
+final_no_outlier$reopen_indicator[final_no_outlier$reopen_indicator == 'N'] <- 0
+
+final_no_outlier$special_event_indicator[final_no_outlier$special_event_indicator == 'Y'] <- 1
+final_no_outlier$special_event_indicator[final_no_outlier$special_event_indicator == 'N'] <- 0
+
+final_no_outlier$standby_indicator[final_no_outlier$standby_indicator == 'Y'] <- 1
+final_no_outlier$standby_indicator[final_no_outlier$standby_indicator == 'N'] <- 0
 
 
-final_dataset_without_outliers$held_indicator[final_dataset_without_outliers$held_indicator == 'Y'] <- 1
-final_dataset_without_outliers$held_indicator[final_dataset_without_outliers$held_indicator == 'N'] <- 0
+final_no_outlier$transfer_indicator[final_no_outlier$transfer_indicator == 'Y'] <- 1
+final_no_outlier$transfer_indicator[final_no_outlier$transfer_indicator == 'N'] <- 0
 
-final_dataset_without_outliers$reopen_indicator[final_dataset_without_outliers$reopen_indicator == 'Y'] <- 1
-final_dataset_without_outliers$reopen_indicator[final_dataset_without_outliers$reopen_indicator == 'N'] <- 0
+sapply(final_no_outlier, class)
+dim(final_no_outlier)
+final_no_outlier <- na.omit(final_no_outlier)
+dim(final_no_outlier)
 
-final_dataset_without_outliers$special_event_indicator[final_dataset_without_outliers$special_event_indicator == 'Y'] <- 1
-final_dataset_without_outliers$special_event_indicator[final_dataset_without_outliers$special_event_indicator == 'N'] <- 0
-
-final_dataset_without_outliers$standby_indicator[final_dataset_without_outliers$standby_indicator == 'Y'] <- 1
-final_dataset_without_outliers$standby_indicator[final_dataset_without_outliers$standby_indicator == 'N'] <- 0
-
-
-final_dataset_without_outliers$transfer_indicator[final_dataset_without_outliers$transfer_indicator == 'Y'] <- 1
-final_dataset_without_outliers$transfer_indicator[final_dataset_without_outliers$transfer_indicator == 'N'] <- 0
-
-sapply(final_dataset_without_outliers, class)
-dim(final_dataset_without_outliers)
-
-final_dataset_without_outliers <- na.omit(final_dataset_without_outliers)
-library(dplyr)
-
-final_dataset_without_outliers <- select(final_dataset_without_outliers, -WT03)
-final_dataset_without_outliers <- select(final_dataset_without_outliers, -WT04)
-final_dataset_without_outliers <- select(final_dataset_without_outliers, -valid_incident_rspns_time_indc)
-final_dataset_without_outliers <- select(final_dataset_without_outliers, -valid_dispatch_rspns_time_indc)
-final_dataset_without_outliers <- select(final_dataset_without_outliers, -WT14)
-sapply(lapply(final_dataset_without_outliers, unique), length)
-
-View(final_dataset_without_outliers)
+final_no_outlier <- select(final_no_outlier, -WT03)
+final_no_outlier <- select(final_no_outlier, -WT04)
+final_no_outlier <- select(final_no_outlier, -valid_incident_rspns_time_indc)
+final_no_outlier <- select(final_no_outlier, -valid_dispatch_rspns_time_indc)
+final_no_outlier <- select(final_no_outlier, -WT14)
+sapply(lapply(final_no_outlier, unique), length)
 
 #Linear Regression
-model_linear <- lm(incident_response_seconds_qy~., data = final_dataset_without_outliers)
+set.seed(7)
+model_linear <- lm(incident_response_seconds_qy~., data = final_no_outlier)
 summary(model_linear)
 sqrt(mean(model_linear$residuals^2))
+#5.84613e-12
 
-#Install Package
-install.packages("e1071")
-
-#Load Library
-library(e1071)
-
-final_dataset_without_outliers$PRCP
 #Regression with SVM
-modelsvm = svm(incident_response_seconds_qy~SNOW+PRCP,final_dataset_without_outliers)
+set.seed(7)
+train <- sample(dim(final_no_outlier)[1], 18000)
+modelsvm = svm(incident_response_seconds_qy~dispatch_response_seconds_qy+incident_travel_tm_seconds_qy, subset = train, data = final_no_outlier)
 
 #Predict using SVM regression
-predYsvm = predict(modelsvm, data)
+predYsvm = predict(modelsvm, final_no_outlier)
 
 #Overlay SVM Predictions on Scatter Plot
-points(data$X, predYsvm, col = "red", pch=16)
+plot(final_no_outlier$dispatch_response_seconds_qy, main = "Scatter Plot")
+points(final_no_outlier$dispatch_response_seconds_qy, predYsvm, col = "red", pch=16)
+summary(modelsvm)
+
+library(Metrics)
+RMSEsvm=rmse(predYsvm,final_no_outlier$dispatch_response_seconds_qy)
+RMSEsvm
+
+### Import libraries
+library(randomForest)
+library(ggplot2)
+
+set.seed(4543)
+rf.fit <- randomForest(incident_response_seconds_qy~SNOW+PRCP, data=final_no_outlier, keep.forest=FALSE, importance=TRUE)
+rf.fit
